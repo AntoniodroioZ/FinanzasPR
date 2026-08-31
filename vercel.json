@@ -1,0 +1,5 @@
+{
+  "buildCommand": "node scripts/generate-config.js",
+  "outputDirectory": ".",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

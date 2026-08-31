@@ -1,0 +1,18 @@
+---
+description: Memoria de producto FinanzasPR — features y plan MVP+
+alwaysApply: true
+---
+
+# FinanzasPR — referencia de desarrollo
+
+Antes de proponer o implementar features de dashboard, métricas, gráficas o categorías, lee:
+
+- `docs/reference/FEATURES.md` — catálogo completo (estado: exists / computed / planned-mvp+ / backlog / future)
+- `docs/reference/MVP-PLUS-PLAN.md` — alcance e implementación del MVP+ activo
+
+## Reglas
+
+- No inventar alcance fuera de `planned-mvp+` o del backlog documentado sin actualizar `FEATURES.md`.
+- Preferir reutilizar `js/balances.js` (`computeBalances`) antes de duplicar lógica de buckets o liquidación.
+- MVP+ no incluye schema nuevo, selector de mes, ni librerías de charts.
+- Mantener tono de copy calmado (“claridad sin presión”) y tokens de `css/styles.css`.

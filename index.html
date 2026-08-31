@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="FinanzasPR — finanzas personales y en pareja, con calma y claridad." />
+  <meta name="theme-color" content="#2d6a4f" />
+  <title>FinanzasPR</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <script>
+    /* Evita flash de tema incorrecto */
+    (function () {
+      try {
+        var t = localStorage.getItem('theme');
+        if (!t) {
+          t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) { /* ignore */ }
+    })();
+  </script>
+</head>
+<body>
+  <div id="loading" class="loading-overlay" aria-live="polite">
+    <div class="spinner" role="status" aria-label="Cargando"></div>
+  </div>
+
+  <header class="app-header">
+    <a href="#dashboard" class="brand" id="brand-link">
+      <span class="brand-mark" aria-hidden="true">💚</span>
+      FinanzasPR
+    </a>
+    <div class="header-actions">
+      <button type="button" class="btn-icon" id="theme-toggle" aria-label="Cambiar tema claro/oscuro" title="Tema">
+        <span id="theme-toggle-icon">🌙</span>
+      </button>
+      <div id="user-chip" class="user-chip hidden">
+        <span class="avatar" id="user-avatar">?</span>
+        <span id="user-name">Usuario</span>
+      </div>
+      <button type="button" class="btn btn-ghost btn-sm hidden" id="logout-btn">Salir</button>
+    </div>
+  </header>
+
+  <main class="app-main" id="app-main">
+    <!-- LOGIN -->
+    <section id="view-login" class="view" data-view="login">
+      <div class="auth-shell">
+        <div class="card auth-card">
+          <h1>Bienvenido</h1>
+          <p>Gestiona tus finanzas personales y compartidas con claridad — sin estrés.</p>
+
+          <div class="auth-tabs" role="tablist">
+            <button type="button" class="auth-tab active" data-auth-tab="login" role="tab">Entrar</button>
+            <button type="button" class="auth-tab" data-auth-tab="register" role="tab">Registrarse</button>
+          </div>
+
+          <form id="auth-form" novalidate>
+            <div class="form-group hidden" id="fullname-name-group">
+              <label for="auth-name">Nombre</label>
+              <input id="auth-name" type="text" autocomplete="name" placeholder="Cómo te gusta que te llamen" />
+            </div>
+            <div class="form-group">
+              <label for="auth-email">Correo</label>
+              <input id="auth-email" type="email" required autocomplete="email" placeholder="tu@email.com" />
+            </div>
+            <div class="form-group">
+              <label for="auth-password">Contraseña</label>
+              <input id="auth-password" type="password" required minlength="6" autocomplete="current-password" placeholder="Mínimo 6 caracteres" />
+            </div>
+            <button type="submit" class="btn btn-block" id="auth-submit">Entrar</button>
+            <p id="auth-message" class="hidden" role="alert"></p>
+          </form>
+
+          <div class="divider">o continúa con</div>
+          <button type="button" class="btn btn-secondary btn-block" id="google-btn">
+            <span aria-hidden="true">G</span> Google
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ONBOARDING -->
+    <section id="view-onboarding" class="view" data-view="onboarding">
+      <h1 class="page-title">Tu espacio compartido</h1>
+      <p class="page-subtitle">
+        <!-- Consejo: separar lo personal de lo del hogar reduce fricciones en pareja. -->
+        Crea un espacio con tu pareja o únete con un código de invitación.
+      </p>
+      <div class="onboarding-grid">
+        <div class="card">
+          <h2 class="card-title" style="text-transform: none; font-size: 1.05rem; letter-spacing: 0;">Crear espacio</h2>
+          <p class="card-context" style="margin-bottom: 1rem;">Serás el anfitrión y podrás invitar a una persona.</p>
+          <form id="create-group-form">
+            <div class="form-group">
+              <label for="group-name">Nombre del espacio</label>
+              <input id="group-name" type="text" placeholder="Nuestro hogar" maxlength="60" />
+            </div>
+            <button type="submit" class="btn btn-block">Crear e invitar</button>
+          </form>
+          <div id="invite-result" class="invite-box hidden">
+            <p style="margin:0;font-size:0.85rem;color:var(--text-secondary);">Comparte este código con tu pareja:</p>
+            <p class="invite-code" id="invite-code-display"></p>
+            <button type="button" class="btn btn-secondary btn-sm" id="copy-invite-btn">Copiar código</button>
+            <button type="button" class="btn btn-sm" id="goto-dashboard-btn" style="margin-left:0.35rem;">Ir al panel</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="card-title" style="text-transform: none; font-size: 1.05rem; letter-spacing: 0;">Unirme</h2>
+          <p class="card-context" style="margin-bottom: 1rem;">Pega el código que te compartió tu pareja.</p>
+          <form id="join-group-form">
+            <div class="form-group">
+              <label for="join-code">Código de invitación</label>
+              <input id="join-code" type="text" required placeholder="UUID del espacio" autocomplete="off" />
+            </div>
+            <button type="submit" class="btn btn-block">Unirme al espacio</button>
+          </form>
+        </div>
+      </div>
+      <p id="onboarding-error" class="form-error hidden" role="alert"></p>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="view-dashboard" class="view" data-view="dashboard">
+      <h1 class="page-title">Tu resumen</h1>
+      <p class="page-subtitle" id="dashboard-month-label">Mes actual — claridad sin presión</p>
+
+      <div class="summary-grid">
+        <article class="summary-card">
+          <div class="icon" aria-hidden="true">📥</div>
+          <p class="card-title">Ingresos</p>
+          <p class="card-value" id="sum-income">$0</p>
+          <p class="card-context">Lo que entró este mes</p>
+        </article>
+        <article class="summary-card">
+          <div class="icon" aria-hidden="true">📤</div>
+          <p class="card-title">Gastos totales</p>
+          <p class="card-value" id="sum-expenses">$0</p>
+          <p class="card-context" id="sum-expenses-ctx">Personales + tu parte del hogar</p>
+        </article>
+        <article class="summary-card">
+          <div class="icon" aria-hidden="true">🏠</div>
+          <p class="card-title">Gastos compartidos</p>
+          <p class="card-value" id="sum-shared">$0</p>
+          <p class="card-context">Total del hogar (bruto)</p>
+        </article>
+        <article class="summary-card">
+          <div class="icon" aria-hidden="true">🤝</div>
+          <p class="card-title">Balance de pareja</p>
+          <p class="card-value" id="sum-couple" style="font-size:1.1rem;">Al día</p>
+          <p class="card-context" id="sum-couple-ctx">Cuentas claras</p>
+        </article>
+        <article class="summary-card">
+          <div class="icon" aria-hidden="true">💰</div>
+          <p class="card-title">Balance neto</p>
+          <p class="card-value" id="sum-net">$0</p>
+          <p class="card-context" id="sum-net-ctx">Lo que te queda este mes</p>
+        </article>
+        <article class="summary-card">
+          <div class="icon" aria-hidden="true">🏦</div>
+          <p class="card-title">Tasa de ahorro</p>
+          <p class="card-value" id="sum-savings-rate">0%</p>
+          <p class="card-context" id="sum-savings-ctx">Meta: ≥20% de ingresos</p>
+        </article>
+      </div>
+
+      <div class="card health-card">
+        <div class="health-header">
+          <span class="health-label" id="health-label">Salud financiera</span>
+          <span class="health-pct" id="health-pct">0%</span>
+        </div>
+        <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="health-bar">
+          <div class="progress-fill" id="health-fill"></div>
+        </div>
+        <p class="card-context" id="health-context" style="margin-top:0.65rem;">
+          Basado en la regla 50/30/20: aspirar a ahorrar al menos el 20% de tus ingresos.
+        </p>
+      </div>
+
+      <div class="card budget-card" id="budget-503020">
+        <h2 class="section-title">Tu distribución vs la regla 50/30/20</h2>
+        <p class="card-context section-lead">Necesidades ≤50%, deseos ≤30%, ahorro ≥20% de tus ingresos.</p>
+        <div class="empty-state-inline hidden" id="budget-503020-empty">
+          <p>Registra tus ingresos para ver cómo se distribuye tu dinero.</p>
+        </div>
+        <div id="budget-503020-rows"></div>
+      </div>
+
+      <div class="card category-card">
+        <h2 class="section-title">¿En qué se va el dinero?</h2>
+        <p class="card-context section-lead">Top categorías de gasto este mes (tu parte).</p>
+        <div class="empty-state-inline hidden" id="category-breakdown-empty">
+          <p>Aún no hay gastos registrados este mes.</p>
+        </div>
+        <ul class="category-breakdown" id="category-breakdown"></ul>
+      </div>
+
+      <div class="tip-card" id="tip-card">
+        <span class="tip-icon" aria-hidden="true">💡</span>
+        <div>
+          <span class="tip-label">Tip del asesor</span>
+          <p id="tip-text">Registra tus ingresos para activar el análisis 50/30/20.</p>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <h2 style="margin:0;font-size:1.1rem;">Últimos movimientos</h2>
+        <a href="#transacciones" class="btn btn-sm">Ver todos</a>
+      </div>
+      <div class="card" style="padding:0;">
+        <ul class="tx-list" id="dashboard-tx-list"></ul>
+        <div class="empty-state hidden" id="dashboard-empty">
+          <div class="emoji">🌱</div>
+          <p>Aún no hay movimientos este mes. Empieza con un ingreso o un gasto pequeño.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRANSACCIONES -->
+    <section id="view-transacciones" class="view" data-view="transacciones">
+      <div class="toolbar">
+        <div>
+          <h1 class="page-title" style="margin-bottom:0;">Movimientos</h1>
+          <p class="page-subtitle" style="margin-bottom:0;">Personal o compartido — tú decides el impacto</p>
+        </div>
+        <button type="button" class="btn" id="open-tx-modal-btn">+ Nuevo</button>
+      </div>
+      <div class="card" style="padding:0;">
+        <ul class="tx-list" id="tx-list"></ul>
+        <div class="empty-state hidden" id="tx-empty">
+          <div class="emoji">📝</div>
+          <p>Sin transacciones todavía. Registrar con frecuencia genera mejores hábitos.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIQUIDACION -->
+    <section id="view-liquidacion" class="view" data-view="liquidacion">
+      <h1 class="page-title">Cuentas claras</h1>
+      <p class="page-subtitle">
+        <!-- Consejo: liquidar pronto evita acumular resentimiento por dinero. -->
+        Calculamos quién adelantó más en gastos compartidos (50/50 por defecto).
+      </p>
+
+      <div class="card">
+        <p class="card-title">Estado de liquidación</p>
+        <p class="settlement-message" id="settlement-message">Cargando…</p>
+      </div>
+
+      <div class="card">
+        <p class="card-title">Resumen por persona</p>
+        <div id="settlement-partners"></div>
+      </div>
+
+      <div class="toolbar" style="margin-top:1rem;">
+        <h2 style="margin:0;font-size:1.1rem;">Gastos compartidos del mes</h2>
+      </div>
+      <div class="card" style="padding:0;">
+        <ul class="tx-list" id="shared-tx-list"></ul>
+        <div class="empty-state hidden" id="shared-empty">
+          <div class="emoji">🤝</div>
+          <p>No hay gastos compartidos este mes. Cuando los haya, verás el balance aquí.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav hidden" id="bottom-nav" aria-label="Navegación principal">
+    <a href="#dashboard" data-nav="dashboard">
+      <span class="nav-icon" aria-hidden="true">📊</span>
+      Resumen
+    </a>
+    <a href="#transacciones" data-nav="transacciones">
+      <span class="nav-icon" aria-hidden="true">💸</span>
+      Movimientos
+    </a>
+    <a href="#liquidacion" data-nav="liquidacion">
+      <span class="nav-icon" aria-hidden="true">⚖️</span>
+      Pareja
+    </a>
+  </nav>
+
+  <!-- Modal nueva / editar transacción -->
+  <div id="tx-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="tx-modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="tx-modal-title">Nuevo movimiento</h2>
+        <button type="button" class="btn-icon" id="close-tx-modal" aria-label="Cerrar">✕</button>
+      </div>
+      <form id="tx-form">
+        <input type="hidden" id="tx-id" value="" />
+        <div class="form-group">
+          <label>Tipo</label>
+          <div class="segmented">
+            <label><input type="radio" name="tx-kind" value="gasto" checked /> Gasto</label>
+            <label><input type="radio" name="tx-kind" value="ingreso" /> Ingreso</label>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tx-amount">Monto</label>
+            <input id="tx-amount" type="number" min="0.01" step="0.01" required placeholder="0.00" />
+          </div>
+          <div class="form-group">
+            <label for="tx-date">Fecha</label>
+            <input id="tx-date" type="date" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="tx-description">Descripción</label>
+          <input id="tx-description" type="text" maxlength="120" placeholder="Ej. Supermercado de la semana" />
+        </div>
+        <div class="form-group">
+          <label for="tx-category">Categoría</label>
+          <select id="tx-category" required></select>
+        </div>
+        <div class="form-group" id="tx-shared-group">
+          <label>Impacto del gasto</label>
+          <div class="segmented">
+            <label><input type="radio" name="tx-shared" value="personal" checked /> Personal</label>
+            <label><input type="radio" name="tx-shared" value="shared" /> Compartido</label>
+          </div>
+          <p class="card-context">Personal solo afecta tu balance. Compartido entra en la liquidación de pareja.</p>
+        </div>
+        <div class="form-group" id="tx-payer-group">
+          <label for="tx-payer">Quién pagó</label>
+          <select id="tx-payer"></select>
+        </div>
+        <button type="submit" class="btn btn-block">Guardar</button>
+        <p id="tx-form-error" class="form-error hidden" role="alert"></p>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-host" id="toast-host" aria-live="polite"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
