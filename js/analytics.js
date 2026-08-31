@@ -7,6 +7,44 @@ function categoryType(tx) {
   return tx.categories?.type || null;
 }
 
+/** Monto de gasto atribuible al usuario (personal o su parte compartida). */
+export function userGastoAmount(tx, userId) {
+  if (categoryType(tx) !== 'gasto') return 0;
+  const amount = Number(tx.amount) || 0;
+  const ratio = Number(tx.split_ratio) ?? 0.5;
+  if (tx.is_shared) return amount * ratio;
+  if (tx.user_id === userId) return amount;
+  return 0;
+}
+
+/**
+ * @returns {{ text: string, class: 'positive'|'negative'|'neutral' } | null}
+ */
+export function formatMonthDelta(current, previous, { invert = false, isPercentPoints = false } = {}) {
+  if (previous === 0 && current === 0) return null;
+  if (previous === 0) {
+    return { text: 'Sin referencia mes anterior', class: 'neutral' };
+  }
+
+  if (isPercentPoints) {
+    const diff = current - previous;
+    const sign = diff > 0 ? '+' : '';
+    const improved = invert ? diff < 0 : diff > 0;
+    return {
+      text: `${sign}${Math.round(diff)} pp vs mes anterior`,
+      class: diff === 0 ? 'neutral' : improved ? 'positive' : 'negative',
+    };
+  }
+
+  const pct = ((current - previous) / Math.abs(previous)) * 100;
+  const sign = pct > 0 ? '+' : '';
+  const improved = invert ? pct < 0 : pct > 0;
+  return {
+    text: `${sign}${Math.round(pct)}% vs mes anterior`,
+    class: pct === 0 ? 'neutral' : improved ? 'positive' : 'negative',
+  };
+}
+
 /** @param {'necesidad'|'deseo'|'ahorro'} bucket */
 export function bucketStatus(bucket, pct) {
   if (bucket === 'necesidad') {
@@ -68,19 +106,7 @@ export function computeCategoryBreakdown(transactions, userId, limit = 8) {
   const totals = new Map();
 
   for (const tx of transactions) {
-    if (categoryType(tx) !== 'gasto') continue;
-
-    const amount = Number(tx.amount) || 0;
-    const ratio = Number(tx.split_ratio) ?? 0.5;
-    const isShared = Boolean(tx.is_shared);
-
-    let userAmount = 0;
-    if (isShared) {
-      userAmount = amount * ratio;
-    } else if (tx.user_id === userId) {
-      userAmount = amount;
-    }
-
+    const userAmount = userGastoAmount(tx, userId);
     if (userAmount <= 0) continue;
 
     const cat = tx.categories;
@@ -97,6 +123,41 @@ export function computeCategoryBreakdown(transactions, userId, limit = 8) {
   const totalExpenses = items.reduce((s, i) => s + i.amount, 0);
 
   return items.slice(0, limit).map((item) => ({
+    ...item,
+    pctOfExpenses: totalExpenses > 0 ? item.amount / totalExpenses : 0,
+  }));
+}
+
+/**
+ * Gastos individuales más grandes (tu parte), ordenados por monto.
+ * @param {Array} transactions
+ * @param {string} userId
+ * @param {number} [limit=10]
+ */
+export function computeTopExpenses(transactions, userId, limit = 10) {
+  const items = [];
+
+  for (const tx of transactions) {
+    const amount = userGastoAmount(tx, userId);
+    if (amount <= 0) continue;
+
+    const cat = tx.categories;
+    items.push({
+      id: tx.id,
+      date: tx.date,
+      description: tx.description || cat?.name || 'Gasto',
+      categoryName: cat?.name || 'Sin categoría',
+      icon: cat?.icon || '📌',
+      amount,
+      isShared: Boolean(tx.is_shared),
+    });
+  }
+
+  items.sort((a, b) => b.amount - a.amount);
+  const top = items.slice(0, limit);
+  const totalExpenses = items.reduce((s, i) => s + i.amount, 0);
+
+  return top.map((item) => ({
     ...item,
     pctOfExpenses: totalExpenses > 0 ? item.amount / totalExpenses : 0,
   }));

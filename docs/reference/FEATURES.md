@@ -25,13 +25,13 @@ Memoria de producto para desarrollo. Prioridades relativas al estado actual del 
 | Salud financiera (barra % + label) | `exists` | Proxy de tasa de ahorro 20% |
 | Tip del asesor (1 insight) | `exists` | `js/tips.js`, regla 50/30/20 |
 | Últimos 5 movimientos | `exists` | Link a `#transacciones` |
-| Label del mes actual | `exists` | Sin selector de mes |
+| Label del mes actual | `exists` | Sincronizado con selector global |
 | **Balance neto del mes** (ingresos − gastos) | `exists` | KPI `#sum-net` |
 | **Tasa de ahorro como KPI** | `exists` | `#sum-savings-rate` |
 | **Gasto personal vs tu parte compartida** | `exists` | Subtexto `#sum-expenses-ctx` |
+| **Comparación vs mes anterior (Δ%)** | `exists` | Deltas en ingresos, gastos, neto, ahorro |
+| **Selector de mes / histórico** | `exists` | Barra global `#global-month-nav` |
 | Burn rate / proyección fin de mes | `backlog` | Requiere calendario del mes |
-| Comparación vs mes anterior (Δ%) | `backlog` | Requiere cargar mes N-1 |
-| Selector de mes / histórico | `backlog` | Hoy filtra solo mes corriente en data layer |
 
 ---
 
@@ -56,8 +56,8 @@ Memoria de producto para desarrollo. Prioridades relativas al estado actual del 
 | Categorías seed (vivienda, food, etc.) | `exists` | Ver sección 8 |
 | Asignar categoría al crear movimiento | `exists` | Modal TX |
 | **Breakdown por categoría en dashboard** | `exists` | `#category-breakdown`, top 8 |
+| **Top N gastos del mes (tabla)** | `exists` | `#top-expenses-table`, top 10 |
 | Pie / donut por categoría | `backlog` | Evolución del breakdown MVP+ |
-| Top N gastos del mes (tabla) | `backlog` | |
 | Ingresos por fuente (Salario / Freelance / Otros) | `backlog` | |
 | Detectar recurrentes vs one-off | `future` | Heurística por descripción/monto |
 
@@ -141,7 +141,7 @@ Memoria de producto para desarrollo. Prioridades relativas al estado actual del 
 | Fase | Contenido | Doc |
 |------|-----------|-----|
 | **MVP+** | Balance neto, desglose visual 50/30/20, gasto por categoría, KPIs derivados ya calculados | `MVP-PLUS-PLAN.md` |
-| **v1.1** | Selector de mes, vs mes anterior, top gastos | backlog arriba |
+| **v1.1** | Selector de mes, vs mes anterior, top gastos | `V1.1-PLAN.md` |
 | **v1.2** | Presupuestos por categoría + alertas | backlog |
 | **v1.3** | Tendencias 6 meses, metas de ahorro, splits flexibles, historial liquidación | backlog / future |
 

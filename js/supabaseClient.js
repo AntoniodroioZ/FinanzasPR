@@ -2,7 +2,7 @@
  * Cliente Supabase (CDN ESM — sin bundler).
  * Compatible con GitHub Pages / Vercel estático.
  */
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/+esm';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from './config.js';
 
 if (!SUPABASE_URL || SUPABASE_URL.includes('YOUR_PROJECT')) {

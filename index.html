@@ -21,8 +21,13 @@
   </script>
 </head>
 <body>
-  <div id="loading" class="loading-overlay" aria-live="polite">
+  <div id="loading" class="loading-overlay hidden" aria-live="polite">
     <div class="spinner" role="status" aria-label="Cargando"></div>
+  </div>
+
+  <div id="boot-fallback" class="boot-fallback hidden" role="alert">
+    <p>No se pudo cargar la aplicación. Revisa la consola (F12) o recarga con <kbd>Cmd+Shift+R</kbd>.</p>
+    <p class="card-context">Si usas un bloqueador de anuncios, permite scripts de <code>cdn.jsdelivr.net</code>.</p>
   </div>
 
   <header class="app-header">
@@ -41,6 +46,12 @@
       <button type="button" class="btn btn-ghost btn-sm hidden" id="logout-btn">Salir</button>
     </div>
   </header>
+
+  <nav id="global-month-nav" class="month-nav-bar hidden" aria-label="Selector de mes">
+    <button type="button" class="btn-icon month-nav-btn" id="month-prev" aria-label="Mes anterior">‹</button>
+    <input type="month" id="month-picker" class="month-picker" aria-label="Elegir mes" />
+    <button type="button" class="btn-icon month-nav-btn" id="month-next" aria-label="Mes siguiente">›</button>
+  </nav>
 
   <main class="app-main" id="app-main">
     <!-- LOGIN -->
@@ -130,12 +141,14 @@
           <div class="icon" aria-hidden="true">📥</div>
           <p class="card-title">Ingresos</p>
           <p class="card-value" id="sum-income">$0</p>
+          <p class="card-delta hidden" id="sum-income-delta"></p>
           <p class="card-context">Lo que entró este mes</p>
         </article>
         <article class="summary-card">
           <div class="icon" aria-hidden="true">📤</div>
           <p class="card-title">Gastos totales</p>
           <p class="card-value" id="sum-expenses">$0</p>
+          <p class="card-delta hidden" id="sum-expenses-delta"></p>
           <p class="card-context" id="sum-expenses-ctx">Personales + tu parte del hogar</p>
         </article>
         <article class="summary-card">
@@ -154,12 +167,14 @@
           <div class="icon" aria-hidden="true">💰</div>
           <p class="card-title">Balance neto</p>
           <p class="card-value" id="sum-net">$0</p>
+          <p class="card-delta hidden" id="sum-net-delta"></p>
           <p class="card-context" id="sum-net-ctx">Lo que te queda este mes</p>
         </article>
         <article class="summary-card">
           <div class="icon" aria-hidden="true">🏦</div>
           <p class="card-title">Tasa de ahorro</p>
           <p class="card-value" id="sum-savings-rate">0%</p>
+          <p class="card-delta hidden" id="sum-savings-delta"></p>
           <p class="card-context" id="sum-savings-ctx">Meta: ≥20% de ingresos</p>
         </article>
       </div>
@@ -193,6 +208,28 @@
           <p>Aún no hay gastos registrados este mes.</p>
         </div>
         <ul class="category-breakdown" id="category-breakdown"></ul>
+      </div>
+
+      <div class="card top-expenses-card">
+        <h2 class="section-title">Mayores gastos del mes</h2>
+        <p class="card-context section-lead">Movimientos individuales más grandes (tu parte).</p>
+        <div class="empty-state-inline hidden" id="top-expenses-empty">
+          <p>Aún no hay gastos registrados este mes.</p>
+        </div>
+        <div class="table-wrap hidden" id="top-expenses-wrap">
+          <table class="data-table" id="top-expenses-table">
+            <thead>
+              <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col">Descripción</th>
+                <th scope="col">Categoría</th>
+                <th scope="col" class="num">Monto</th>
+                <th scope="col" class="num">%</th>
+              </tr>
+            </thead>
+            <tbody id="top-expenses-body"></tbody>
+          </table>
+        </div>
       </div>
 
       <div class="tip-card" id="tip-card">
@@ -333,6 +370,18 @@
   </div>
 
   <div class="toast-host" id="toast-host" aria-live="polite"></div>
+
+  <script>
+    /* Fallback si app.js no arranca (CDN bloqueado, error de módulo, etc.) */
+    setTimeout(function () {
+      var loading = document.getElementById('loading');
+      var fallback = document.getElementById('boot-fallback');
+      if (loading && !loading.classList.contains('hidden') && fallback) {
+        loading.classList.add('hidden');
+        fallback.classList.remove('hidden');
+      }
+    }, 8000);
+  </script>
 
   <script type="module" src="js/app.js"></script>
 </body>

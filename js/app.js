@@ -19,9 +19,20 @@ import {
   deleteTransaction,
   startOfMonth,
   endOfMonth,
+  shiftMonth,
+  monthToInputValue,
+  parseMonthInput,
+  isFutureMonth,
+  isSameMonth,
+  normalizeMonth,
 } from './transactions.js';
 import { computeBalances, displayName, formatMoney, monthLabel } from './balances.js';
-import { computeBucketRows, computeCategoryBreakdown } from './analytics.js';
+import {
+  computeBucketRows,
+  computeCategoryBreakdown,
+  computeTopExpenses,
+  formatMonthDelta,
+} from './analytics.js';
 import { getFinancialTip } from './tips.js';
 
 /** @type {{ session: any, profile: any, group: any, members: any[], categories: any[], transactions: any[] }} */
@@ -32,6 +43,10 @@ const state = {
   members: [],
   categories: [],
   transactions: [],
+  prevMonthTransactions: [],
+  selectedMonth: normalizeMonth(new Date()),
+  monthPickerSync: false,
+  sessionInitDone: false,
   authMode: 'login', // login | register
 };
 
@@ -96,8 +111,11 @@ function navigate(hash) {
 
   const showChrome = Boolean(state.session && state.profile?.group_id);
   $('#bottom-nav').classList.toggle('hidden', !showChrome);
+  $('#global-month-nav').classList.toggle('hidden', !showChrome);
   $('#user-chip').classList.toggle('hidden', !state.session);
   $('#logout-btn').classList.toggle('hidden', !state.session);
+
+  if (showChrome) updateMonthNavUi();
 
   if (view === 'dashboard' && showChrome) renderDashboard();
   if (view === 'transacciones' && showChrome) renderTransactions();
@@ -127,16 +145,82 @@ async function refreshData() {
     state.members = [];
     state.categories = [];
     state.transactions = [];
+    state.prevMonthTransactions = [];
     return;
   }
 
   state.group = await fetchMyGroup(state.profile.group_id);
   state.members = await fetchGroupMembers(state.profile.group_id);
   state.categories = await fetchCategories(state.profile.group_id);
-  state.transactions = await fetchTransactions(state.profile.group_id, {
-    from: startOfMonth(),
-    to: endOfMonth(),
-  });
+
+  const month = state.selectedMonth;
+  const prevMonth = shiftMonth(month, -1);
+  const fetchWithTimeout = (promise, ms = 15000) =>
+    Promise.race([
+      promise,
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Tiempo de espera agotado al cargar datos')), ms)
+      ),
+    ]);
+
+  const [transactions, prevMonthTransactions] = await Promise.all([
+    fetchWithTimeout(
+      fetchTransactions(state.profile.group_id, {
+        from: startOfMonth(month),
+        to: endOfMonth(month),
+      })
+    ),
+    fetchWithTimeout(
+      fetchTransactions(state.profile.group_id, {
+        from: startOfMonth(prevMonth),
+        to: endOfMonth(prevMonth),
+      })
+    ),
+  ]);
+  state.transactions = transactions;
+  state.prevMonthTransactions = prevMonthTransactions;
+}
+
+function updateMonthNavUi() {
+  const picker = $('#month-picker');
+  const nextBtn = $('#month-next');
+  if (!picker) return;
+  state.monthPickerSync = true;
+  picker.value = monthToInputValue(state.selectedMonth);
+  picker.max = monthToInputValue(new Date());
+  if (nextBtn) nextBtn.disabled = isSameMonth(state.selectedMonth, new Date());
+  state.monthPickerSync = false;
+}
+
+async function changeSelectedMonth(nextDate) {
+  if (isFutureMonth(nextDate)) return;
+  state.selectedMonth = normalizeMonth(nextDate);
+  updateMonthNavUi();
+  setLoading(true);
+  try {
+    await refreshData();
+    const view = location.hash.replace('#', '') || 'dashboard';
+    if (view === 'transacciones') renderTransactions();
+    else if (view === 'liquidacion') renderSettlement();
+    else renderDashboard();
+  } catch (err) {
+    showToast(err.message || 'No se pudo cargar el mes', 'error');
+  } finally {
+    setLoading(false);
+  }
+}
+
+function renderCardDelta(elId, current, previous, options = {}) {
+  const el = $(elId);
+  if (!el) return;
+  const delta = formatMonthDelta(current, previous, options);
+  if (!delta) {
+    el.textContent = '';
+    el.className = 'card-delta hidden';
+    return;
+  }
+  el.textContent = delta.text;
+  el.className = `card-delta ${delta.class}`;
 }
 
 function txRowHtml(tx, { showActions = false } = {}) {
@@ -181,11 +265,21 @@ function escapeHtml(str) {
 function renderDashboard() {
   const userId = state.session.user.id;
   const stats = computeBalances(state.transactions, userId, state.members);
+  const prevStats = computeBalances(state.prevMonthTransactions, userId, state.members);
 
-  $('#dashboard-month-label').textContent = `${capitalize(monthLabel())} — claridad sin presión`;
+  const monthText = capitalize(monthLabel(state.selectedMonth));
+  const isCurrent = isSameMonth(state.selectedMonth, new Date());
+  $('#dashboard-month-label').textContent = isCurrent
+    ? `${monthText} — claridad sin presión`
+    : `${monthText} — mes seleccionado`;
+
   $('#sum-income').textContent = formatMoney(stats.ingresos);
+  renderCardDelta('#sum-income-delta', stats.ingresos, prevStats.ingresos);
+
   $('#sum-expenses').textContent = formatMoney(stats.gastosTotales);
-  $('#sum-shared').textContent = formatMoney(stats.gastosCompartidosBruto);
+  renderCardDelta('#sum-expenses-delta', stats.gastosTotales, prevStats.gastosTotales, {
+    invert: true,
+  });
 
   if (stats.gastosTotales > 0) {
     $('#sum-expenses-ctx').textContent = `Personal ${formatMoney(stats.gastosPersonales)} · Hogar ${formatMoney(stats.gastosCompartidosMiParte)}`;
@@ -193,10 +287,13 @@ function renderDashboard() {
     $('#sum-expenses-ctx').textContent = 'Personales + tu parte del hogar';
   }
 
+  $('#sum-shared').textContent = formatMoney(stats.gastosCompartidosBruto);
+
   const netEl = $('#sum-net');
   netEl.textContent = formatMoney(stats.balancePersonal);
   netEl.classList.toggle('positive', stats.balancePersonal > 0);
   netEl.classList.toggle('negative', stats.balancePersonal < 0);
+  renderCardDelta('#sum-net-delta', stats.balancePersonal, prevStats.balancePersonal);
   $('#sum-net-ctx').textContent =
     stats.balancePersonal < 0
       ? 'Este mes gastaste más de lo que entró'
@@ -204,7 +301,10 @@ function renderDashboard() {
 
   const savingsPct =
     stats.ingresos > 0 ? Math.round((stats.ahorro / stats.ingresos) * 100) : 0;
+  const prevSavingsPct =
+    prevStats.ingresos > 0 ? Math.round((prevStats.ahorro / prevStats.ingresos) * 100) : 0;
   $('#sum-savings-rate').textContent = stats.ingresos > 0 ? `${savingsPct}%` : '—';
+  renderCardDelta('#sum-savings-delta', savingsPct, prevSavingsPct, { isPercentPoints: true });
   $('#sum-savings-ctx').textContent =
     stats.ingresos > 0
       ? `${formatMoney(stats.ahorro)} registrados · Meta ≥20%`
@@ -231,10 +331,12 @@ function renderDashboard() {
 
   renderBudget503020(stats);
   renderCategoryBreakdown(userId);
+  renderTopExpenses(userId);
 
   const tip = getFinancialTip(stats);
   $('#tip-text').textContent = tip.text;
-  $('.tip-icon', $('#tip-card')).textContent = tip.icon;
+  const tipIcon = $('.tip-icon', $('#tip-card'));
+  if (tipIcon) tipIcon.textContent = tip.icon;
 
   const list = $('#dashboard-tx-list');
   const recent = state.transactions.slice(0, 5);
@@ -309,6 +411,37 @@ function renderCategoryBreakdown(userId) {
           </div>
           <span class="category-pct">${barPct}% del gasto</span>
         </li>
+      `;
+    })
+    .join('');
+}
+
+function renderTopExpenses(userId) {
+  const tbody = $('#top-expenses-body');
+  const wrap = $('#top-expenses-wrap');
+  const emptyEl = $('#top-expenses-empty');
+  const items = computeTopExpenses(state.transactions, userId, 10);
+
+  if (items.length === 0) {
+    tbody.innerHTML = '';
+    wrap.classList.add('hidden');
+    emptyEl.classList.remove('hidden');
+    return;
+  }
+
+  emptyEl.classList.add('hidden');
+  wrap.classList.remove('hidden');
+  tbody.innerHTML = items
+    .map((item) => {
+      const sharedNote = item.isShared ? ' <span class="badge">Compartido</span>' : '';
+      return `
+        <tr>
+          <td>${escapeHtml(item.date)}</td>
+          <td>${escapeHtml(item.description)}${sharedNote}</td>
+          <td>${escapeHtml(item.icon)} ${escapeHtml(item.categoryName)}</td>
+          <td class="num">${formatMoney(item.amount)}</td>
+          <td class="num">${Math.round(item.pctOfExpenses * 100)}%</td>
+        </tr>
       `;
     })
     .join('');
@@ -621,7 +754,39 @@ function setupTxModal() {
   });
 }
 
+function setupMonthNav() {
+  const prev = $('#month-prev');
+  const next = $('#month-next');
+  const picker = $('#month-picker');
+  if (!prev || !next || !picker) {
+    console.warn('[FinanzasPR] Month nav no encontrado en el DOM — recarga forzada (Ctrl+Shift+R).');
+    return;
+  }
+
+  prev.addEventListener('click', () => {
+    changeSelectedMonth(shiftMonth(state.selectedMonth, -1));
+  });
+
+  next.addEventListener('click', () => {
+    if (isSameMonth(state.selectedMonth, new Date())) return;
+    changeSelectedMonth(shiftMonth(state.selectedMonth, 1));
+  });
+
+  picker.addEventListener('change', (e) => {
+    if (state.monthPickerSync) return;
+    changeSelectedMonth(parseMonthInput(e.target.value));
+  });
+}
+
 /* ---------- Boot ---------- */
+let bootstrapped = false;
+
+async function bootstrapSession(session) {
+  if (bootstrapped) return;
+  bootstrapped = true;
+  await handleSession(session);
+}
+
 async function handleSession(session) {
   state.session = session;
   if (!session) {
@@ -630,6 +795,7 @@ async function handleSession(session) {
     state.members = [];
     state.categories = [];
     state.transactions = [];
+    state.prevMonthTransactions = [];
     setLoading(false);
     location.hash = '#login';
     navigate('#login');
@@ -638,7 +804,6 @@ async function handleSession(session) {
 
   try {
     await refreshData();
-    setLoading(false);
     if (!state.profile?.group_id) {
       location.hash = '#onboarding';
       navigate('#onboarding');
@@ -649,35 +814,59 @@ async function handleSession(session) {
     }
   } catch (err) {
     console.error(err);
-    setLoading(false);
     showToast(err.message || 'Error al cargar datos. ¿Ejecutaste el SQL en Supabase?', 'error');
     navigate(location.hash || '#login');
+  } finally {
+    setLoading(false);
   }
 }
 
 async function boot() {
-  initTheme();
-  setupAuthUi();
-  setupOnboarding();
-  setupTxModal();
+  setLoading(true);
+  $('#boot-fallback')?.classList.add('hidden');
 
-  window.addEventListener('hashchange', () => navigate(location.hash));
-
-  onAuthStateChange(async (_event, session) => {
-    await handleSession(session);
-  });
+  const loadTimeout = setTimeout(() => {
+    setLoading(false);
+    $('#boot-fallback')?.classList.remove('hidden');
+    showToast('La carga tardó demasiado. Revisa tu conexión o recarga con Cmd+Shift+R.', 'error');
+  }, 20000);
 
   try {
-    const session = await getSession();
-    await handleSession(session);
+    initTheme();
+    setupAuthUi();
+    setupOnboarding();
+    setupTxModal();
+    setupMonthNav();
+
+    window.addEventListener('hashchange', () => navigate(location.hash));
+
+    onAuthStateChange(async (event, session) => {
+      if (event === 'INITIAL_SESSION') {
+        await bootstrapSession(session);
+        return;
+      }
+      if (!bootstrapped) return;
+      await handleSession(session);
+    });
+
+    const session = await Promise.race([
+      getSession(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('No se pudo verificar la sesión')), 12000)
+      ),
+    ]);
+    await bootstrapSession(session);
+    state.sessionInitDone = true;
   } catch (err) {
     console.error(err);
-    setLoading(false);
     showToast(
-      'No se pudo conectar con Supabase. Configura .env y ejecuta: node scripts/generate-config.js',
+      err.message || 'No se pudo conectar con Supabase. Configura .env y ejecuta: node scripts/generate-config.js',
       'error'
     );
     navigate('#login');
+  } finally {
+    clearTimeout(loadTimeout);
+    setLoading(false);
   }
 }
 

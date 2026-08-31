@@ -4,14 +4,59 @@
  */
 import { supabase } from './supabaseClient.js';
 
+export function normalizeMonth(date = new Date()) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
 export function startOfMonth(date = new Date()) {
-  const d = new Date(date.getFullYear(), date.getMonth(), 1);
-  return d.toISOString().slice(0, 10);
+  const d = normalizeMonth(date);
+  return toLocalDateStr(d);
 }
 
 export function endOfMonth(date = new Date()) {
   const d = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-  return d.toISOString().slice(0, 10);
+  return toLocalDateStr(d);
+}
+
+function toLocalDateStr(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+/** @param {Date} date @param {number} delta meses (+1 / -1) */
+export function shiftMonth(date, delta) {
+  const d = normalizeMonth(date);
+  return new Date(d.getFullYear(), d.getMonth() + delta, 1);
+}
+
+export function isSameMonth(a, b) {
+  const x = normalizeMonth(a);
+  const y = normalizeMonth(b);
+  return x.getFullYear() === y.getFullYear() && x.getMonth() === y.getMonth();
+}
+
+export function isFutureMonth(date) {
+  const d = normalizeMonth(date);
+  const now = normalizeMonth(new Date());
+  return d.getFullYear() > now.getFullYear()
+    || (d.getFullYear() === now.getFullYear() && d.getMonth() > now.getMonth());
+}
+
+/** Valor para `<input type="month">` (YYYY-MM). */
+export function monthToInputValue(date = new Date()) {
+  const d = normalizeMonth(date);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  return `${y}-${m}`;
+}
+
+/** Parsea YYYY-MM del picker. */
+export function parseMonthInput(value) {
+  const [y, m] = String(value).split('-').map(Number);
+  if (!y || !m) return normalizeMonth(new Date());
+  return new Date(y, m - 1, 1);
 }
 
 export async function fetchCategories(groupId) {

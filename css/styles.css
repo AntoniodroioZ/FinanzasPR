@@ -100,6 +100,32 @@ img {
   display: none !important;
 }
 
+.boot-fallback {
+  max-width: 960px;
+  margin: var(--space-xl) auto;
+  padding: var(--space-lg);
+  background: var(--danger-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-primary);
+}
+
+.boot-fallback p {
+  margin: 0 0 var(--space-sm);
+}
+
+.boot-fallback p:last-child {
+  margin-bottom: 0;
+}
+
+.boot-fallback kbd {
+  font-size: 0.85em;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+}
+
 /* ---------- Header ---------- */
 .app-header {
   position: sticky;
@@ -369,6 +395,118 @@ img {
   margin: var(--space-xs) 0 0;
   font-size: 0.85rem;
   color: var(--text-muted);
+}
+
+.card-delta {
+  margin: 0.15rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.card-delta.positive {
+  color: var(--success);
+}
+
+.card-delta.negative {
+  color: #c0392b;
+}
+
+.card-delta.neutral {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .card-delta.negative {
+  color: #e57373;
+}
+
+/* ---------- Month selector (v1.1) ---------- */
+.month-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: var(--header-h);
+  z-index: 35;
+}
+
+.month-nav-bar.hidden {
+  display: none;
+}
+
+.month-nav-btn {
+  font-size: 1.25rem;
+  line-height: 1;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+}
+
+.month-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.month-picker {
+  font: inherit;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.6rem;
+  min-width: 10rem;
+  text-align: center;
+}
+
+.month-picker:focus {
+  outline: 2px solid var(--accent-soft);
+  border-color: var(--accent);
+}
+
+/* ---------- Data table (v1.1) ---------- */
+.table-wrap {
+  overflow-x: auto;
+  margin: 0 calc(-1 * var(--space-md));
+  padding: 0 var(--space-md);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.55rem 0.4rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.data-table th {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+.data-table td.num,
+.data-table th.num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.top-expenses-card {
+  margin-bottom: var(--space-md);
 }
 
 .summary-grid {
