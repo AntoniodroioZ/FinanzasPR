@@ -21,11 +21,12 @@ Stack: HTML5 · CSS3 (variables, light/dark) · JavaScript Vanilla (ES Modules) 
   2. Authorized redirect URI de Supabase (lo muestra el panel al activar Google).
   3. Authentication → Providers → Google → Client ID y Secret.
 - **URL Configuration** (Authentication → URL Configuration):
-  - Site URL: tu URL de producción (Vercel o GitHub Pages).
+  - Site URL: `https://finanzas.antoniodroios.com/`
   - Redirect URLs:
     - `http://localhost:5500/`
     - `http://127.0.0.1:5500/`
-    - `https://<tu-usuario>.github.io/FinanzasPR/`
+    - `https://finanzas.antoniodroios.com/`
+    - `https://<tu-usuario>.github.io/FinanzasPR/` (respaldo)
     - `https://<tu-proyecto>.vercel.app/`
 
 ### 3. Schema SQL
@@ -100,11 +101,15 @@ Abre `http://localhost:5500/`.
 ### GitHub Pages
 
 1. Settings → Pages → Source: **GitHub Actions**.
-2. Secrets del repo (`Settings → Secrets and variables → Actions`):
+2. Settings → Pages → Custom domain: `finanzas.antoniodroios.com` (el archivo [`CNAME`](CNAME) en el repo lo declara en cada deploy).
+3. En Hostinger (DNS del dominio raíz `antoniodroios.com`):
+   - Tipo **CNAME**, host `finanzas` → `antoniodroioz.github.io`
+4. Secrets del repo (`Settings → Secrets and variables → Actions`):
    - `SUPABASE_URL`
    - `SUPABASE_ANON_KEY`
-3. El workflow [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) genera `js/config.js` y publica.
-4. Añade `https://<usuario>.github.io/FinanzasPR/` en Supabase Redirect URLs.
+5. El workflow [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) genera `js/config.js` y publica.
+6. Cuando DNS y HTTPS estén en verde en GitHub Pages, activa **Enforce HTTPS**.
+7. Añade `https://finanzas.antoniodroios.com/` en Supabase (Site URL y Redirect URLs).
 
 ---
 

@@ -1,4 +1,4 @@
-# Deploy FinanzasPR a GitHub Pages test
+# Deploy FinanzasPR a GitHub Pages (https://finanzas.antoniodroios.com)
 name: Deploy to GitHub Pages
 
 on:
@@ -29,7 +29,7 @@ jobs:
         run: |
           node scripts/generate-config.js
           mkdir -p _site/css _site/js
-          cp index.html .nojekyll _site/
+          cp index.html .nojekyll CNAME _site/
           cp css/styles.css _site/css/
           cp js/*.js _site/js/
 
