@@ -149,12 +149,13 @@ function navigate(hash) {
   const target = $(`#view-${view}`) || (state.session ? $('#view-dashboard') : $('#view-login'));
   target?.classList.add('active');
 
-  $$('#bottom-nav a').forEach((a) => {
+  $$('#bottom-nav a, #sidebar a[data-nav]').forEach((a) => {
     a.classList.toggle('active', a.dataset.nav === view);
   });
 
   const showChrome = Boolean(state.session && state.profile?.group_id);
   $('#bottom-nav').classList.toggle('hidden', !showChrome);
+  $('#sidebar').classList.toggle('hidden', !showChrome);
   $('#global-month-nav').classList.toggle('hidden', !showChrome);
   $('#user-chip').classList.toggle('hidden', !state.session);
   $('#user-chip')?.classList.toggle('active', view === 'perfil');
@@ -191,12 +192,13 @@ function updateUserChip() {
   if (!state.session) return;
   const name = displayName(state.profile) || state.session.user.email;
   $('#user-name').textContent = name;
+  const sidebarName = $('#sidebar-user-name');
+  if (sidebarName) sidebarName.textContent = name;
   const avatar = $('#user-avatar');
-  const url = state.profile?.avatar_url;
-  if (url && avatar.tagName === 'SPAN') {
-    // keep letter avatar for simplicity
-  }
-  avatar.textContent = (name || '?').charAt(0).toUpperCase();
+  const sidebarAvatar = $('#sidebar-avatar');
+  const initial = (name || '?').charAt(0).toUpperCase();
+  avatar.textContent = initial;
+  if (sidebarAvatar) sidebarAvatar.textContent = initial;
 }
 
 async function fetchOptional(label, promise, fallback) {
@@ -379,10 +381,70 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Buenos días';
+  if (h < 19) return 'Buenas tardes';
+  return 'Buenas noches';
+}
+
+function animateCountUp(el, endText, duration = 600) {
+  if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (el) el.textContent = endText;
+    return;
+  }
+  const match = endText.match(/^([^0-9\-]*)([\d,.\-]+)(.*)$/);
+  if (!match) {
+    el.textContent = endText;
+    return;
+  }
+  const prefix = match[1];
+  const suffix = match[3];
+  const end = parseFloat(match[2].replace(/,/g, ''));
+  if (Number.isNaN(end)) {
+    el.textContent = endText;
+    return;
+  }
+  const start = 0;
+  const startTime = performance.now();
+  el.classList.add('counting');
+  function tick(now) {
+    const t = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    const val = start + (end - start) * eased;
+    const formatted =
+      match[2].includes('.') || match[2].includes(',')
+        ? val.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        : Math.round(val).toLocaleString('es-MX');
+    el.textContent = `${prefix}${formatted}${suffix}`;
+    if (t < 1) requestAnimationFrame(tick);
+    else {
+      el.textContent = endText;
+      el.classList.remove('counting');
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+function replayAnimations(root) {
+  if (!root || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  root.querySelectorAll('.animate-in').forEach((el) => {
+    el.style.animation = 'none';
+    void el.offsetHeight;
+    el.style.animation = '';
+  });
+}
+
 function renderDashboard() {
   const userId = state.session.user.id;
   const stats = computeBalances(state.transactions, userId, state.members);
   const prevStats = computeBalances(state.prevMonthTransactions, userId, state.members);
+
+  const greetingEl = $('#dashboard-greeting');
+  if (greetingEl) {
+    const name = displayName(state.profile);
+    greetingEl.textContent = name ? `${getGreeting()}, ${name.split(' ')[0]}` : getGreeting();
+  }
 
   const monthText = capitalize(monthLabel(state.selectedMonth));
   const isCurrent = isSameMonth(state.selectedMonth, new Date());
@@ -407,7 +469,8 @@ function renderDashboard() {
   $('#sum-shared').textContent = formatMoney(stats.gastosCompartidosBruto);
 
   const netEl = $('#sum-net');
-  netEl.textContent = formatMoney(stats.balancePersonal);
+  const netFormatted = formatMoney(stats.balancePersonal);
+  animateCountUp(netEl, netFormatted);
   netEl.classList.toggle('positive', stats.balancePersonal > 0);
   netEl.classList.toggle('negative', stats.balancePersonal < 0);
   renderCardDelta('#sum-net-delta', stats.balancePersonal, prevStats.balancePersonal);
@@ -467,6 +530,7 @@ function renderDashboard() {
   const recent = state.transactions.slice(0, 5);
   list.innerHTML = recent.map((tx) => txRowHtml(tx)).join('');
   $('#dashboard-empty').classList.toggle('hidden', recent.length > 0);
+  replayAnimations($('#view-dashboard'));
 }
 
 function renderBudget503020(stats) {
@@ -607,11 +671,11 @@ function renderTopExpenses(userId) {
       const sharedNote = item.isShared ? ' <span class="badge">Compartido</span>' : '';
       return `
         <tr>
-          <td>${escapeHtml(item.date)}</td>
-          <td>${escapeHtml(item.description)}${sharedNote}</td>
-          <td>${escapeHtml(item.icon)} ${escapeHtml(item.categoryName)}</td>
-          <td class="num">${formatMoney(item.amount)}</td>
-          <td class="num">${Math.round(item.pctOfExpenses * 100)}%</td>
+          <td data-label="Fecha">${escapeHtml(item.date)}</td>
+          <td data-label="Descripción">${escapeHtml(item.description)}${sharedNote}</td>
+          <td data-label="Categoría">${escapeHtml(item.icon)} ${escapeHtml(item.categoryName)}</td>
+          <td class="num" data-label="Monto">${formatMoney(item.amount)}</td>
+          <td class="num" data-label="%">${Math.round(item.pctOfExpenses * 100)}%</td>
         </tr>
       `;
     })
@@ -744,18 +808,14 @@ function trendRowHtml(row, { showBar = false, maxExpenses = 1, selectedMonthKey 
   const netClass = net > 0 ? 'positive' : net < 0 ? 'negative' : '';
   const selected = selectedMonthKey && monthKey === selectedMonthKey ? ' trend-row-selected' : '';
   const barPct = showBar && hasData ? Math.round((stats.gastosTotales / maxExpenses) * 100) : 0;
-  const barCell = showBar
-    ? `<td class="num"><div class="trend-mini-bar" style="width:${barPct}%"></div></td>`
-    : '';
-
   return `
     <tr class="${hasData ? '' : 'trend-row-empty'}${selected}">
-      <td>${escapeHtml(label)}</td>
-      <td class="num">${hasData ? formatMoney(stats.ingresos) : '—'}</td>
-      <td class="num">${hasData ? formatMoney(stats.gastosTotales) : '—'}</td>
-      ${barCell}
-      <td class="num">${hasData ? formatMoney(stats.ahorro) : '—'}</td>
-      <td class="num ${netClass}">${hasData ? formatMoney(net) : '—'}</td>
+      <td data-label="Mes">${escapeHtml(label)}</td>
+      <td class="num" data-label="Ingresos">${hasData ? formatMoney(stats.ingresos) : '—'}</td>
+      <td class="num" data-label="Gastos">${hasData ? formatMoney(stats.gastosTotales) : '—'}</td>
+      ${showBar ? `<td class="num" data-label="Gastos (barra)"><div class="trend-mini-bar" style="width:${barPct}%"></div></td>` : ''}
+      <td class="num" data-label="Ahorro">${hasData ? formatMoney(stats.ahorro) : '—'}</td>
+      <td class="num ${netClass}" data-label="Neto">${hasData ? formatMoney(net) : '—'}</td>
     </tr>
   `;
 }
@@ -928,13 +988,13 @@ function renderPresupuestos() {
       const inputVal = row.budget !== null ? row.budget : '';
       return `
         <tr data-category-id="${row.categoryId}">
-          <td class="budget-cat">${escapeHtml(row.icon)} ${escapeHtml(row.name)}</td>
-          <td class="num">
+          <td class="budget-cat" data-label="Categoría">${escapeHtml(row.icon)} ${escapeHtml(row.name)}</td>
+          <td class="num" data-label="Presupuesto">
             <input type="number" class="budget-input" min="0.01" step="0.01" placeholder="—" value="${inputVal}" aria-label="Presupuesto ${escapeHtml(row.name)}" />
           </td>
-          <td class="num">${formatMoney(row.spent)}</td>
-          <td>${chip}</td>
-          <td class="num">
+          <td class="num" data-label="Gastado">${formatMoney(row.spent)}</td>
+          <td data-label="Estado">${chip}</td>
+          <td class="num" data-label="Acción">
             <button type="button" class="btn btn-sm budget-save-row" data-category-id="${row.categoryId}">Guardar</button>
           </td>
         </tr>
@@ -1323,7 +1383,11 @@ function syncTxKindUi() {
 }
 
 function setupTxModal() {
-  $('#open-tx-modal-btn').addEventListener('click', () => openTxModal());
+  const openModal = () => openTxModal();
+  $('#open-tx-modal-btn').addEventListener('click', openModal);
+  $('#fab-tx-btn')?.addEventListener('click', openModal);
+  $('#sidebar-new-tx-btn')?.addEventListener('click', openModal);
+  $('#dashboard-new-tx-btn')?.addEventListener('click', openModal);
   $('#close-tx-modal').addEventListener('click', closeTxModal);
   $('#tx-modal').addEventListener('click', (e) => {
     if (e.target === $('#tx-modal')) closeTxModal();
@@ -1629,14 +1693,14 @@ async function handleSession(session) {
 }
 
 async function boot() {
+  window.__finanzasBootStarted = true;
   navigate(location.hash || '#login');
   setLoading(true);
   $('#boot-fallback')?.classList.add('hidden');
 
   window.addEventListener('error', (event) => {
+    // No mostrar el banner rojo por errores ajenos (fuentes, extensiones, etc.).
     console.error('[FinanzasPR] Error no capturado:', event.error || event.message);
-    setLoading(false);
-    $('#boot-fallback')?.classList.remove('hidden');
   });
 
   window.addEventListener('unhandledrejection', (event) => {
@@ -1645,8 +1709,8 @@ async function boot() {
 
   const loadTimeout = setTimeout(() => {
     setLoading(false);
-    $('#boot-fallback')?.classList.remove('hidden');
-    showToast('La carga tardó demasiado. Revisa tu conexión o recarga con Cmd+Shift+R.', 'error');
+    // La UI de login ya puede usarse; solo avisamos sin el banner de "app rota".
+    showToast('La verificación de sesión tarda. Puedes intentar entrar o recargar.', 'error');
   }, 20000);
 
   try {
@@ -1663,6 +1727,10 @@ async function boot() {
 
     window.addEventListener('hashchange', () => navigate(location.hash));
 
+    // UI lista: oculta el fallback aunque Supabase tarde.
+    $('#boot-fallback')?.classList.add('hidden');
+    setLoading(false);
+
     onAuthStateChange(async (event, session) => {
       if (event === 'INITIAL_SESSION') {
         await bootstrapSession(session);
@@ -1672,12 +1740,26 @@ async function boot() {
       await handleSession(session);
     });
 
-    const session = await Promise.race([
-      getSession(),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('No se pudo verificar la sesión')), 12000)
-      ),
-    ]);
+    let session = null;
+    try {
+      session = await Promise.race([
+        getSession(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('No se pudo verificar la sesión')), 12000)
+        ),
+      ]);
+    } catch (sessionErr) {
+      // Login sigue usable; no tratar esto como "app no cargó".
+      console.warn('[FinanzasPR] Sesión no verificada a tiempo:', sessionErr);
+      showToast(
+        sessionErr.message || 'No se pudo verificar la sesión. Revisa tu conexión con Supabase.',
+        'error'
+      );
+      navigate('#login');
+      state.sessionInitDone = true;
+      return;
+    }
+
     await bootstrapSession(session);
     state.sessionInitDone = true;
   } catch (err) {
@@ -1687,6 +1769,7 @@ async function boot() {
       'error'
     );
     navigate('#login');
+    // Solo banner rojo si falló el setup de UI (DOM/handlers), no por red/sesión.
     $('#boot-fallback')?.classList.remove('hidden');
   } finally {
     clearTimeout(loadTimeout);

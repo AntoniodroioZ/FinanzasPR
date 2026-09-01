@@ -6,6 +6,9 @@
   <meta name="description" content="FinanzasPR — finanzas personales y en pareja, con calma y claridad." />
   <meta name="theme-color" content="#2d6a4f" />
   <title>FinanzasPR</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
   <script>
     /* Evita flash de tema incorrecto */
@@ -30,6 +33,53 @@
     <p class="card-context">Si usas un bloqueador de anuncios, permite scripts de <code>cdn.jsdelivr.net</code>.</p>
   </div>
 
+  <div class="app-shell" id="app-shell">
+  <aside class="sidebar hidden" id="sidebar" aria-label="Navegación principal">
+    <a href="#dashboard" class="sidebar-brand" id="sidebar-brand-link">
+      <span class="brand-mark" aria-hidden="true">💚</span>
+      <span class="sidebar-brand-text">FinanzasPR</span>
+    </a>
+    <nav class="sidebar-nav">
+      <p class="sidebar-section-label">Principal</p>
+      <a href="#dashboard" data-nav="dashboard" class="sidebar-link">
+        <span class="nav-icon" aria-hidden="true">📊</span>
+        <span>Resumen</span>
+      </a>
+      <a href="#transacciones" data-nav="transacciones" class="sidebar-link">
+        <span class="nav-icon" aria-hidden="true">💸</span>
+        <span>Movimientos</span>
+      </a>
+      <a href="#liquidacion" data-nav="liquidacion" class="sidebar-link">
+        <span class="nav-icon" aria-hidden="true">⚖️</span>
+        <span>Pareja</span>
+      </a>
+      <p class="sidebar-section-label">Planificación</p>
+      <a href="#presupuestos" data-nav="presupuestos" class="sidebar-link">
+        <span class="nav-icon" aria-hidden="true">🎯</span>
+        <span>Presupuestos</span>
+      </a>
+      <a href="#metas" data-nav="metas" class="sidebar-link">
+        <span class="nav-icon" aria-hidden="true">🏆</span>
+        <span>Metas</span>
+      </a>
+      <a href="#informes" data-nav="informes" class="sidebar-link">
+        <span class="nav-icon" aria-hidden="true">📈</span>
+        <span>Informes</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button type="button" class="btn btn-block sidebar-new-tx" id="sidebar-new-tx-btn">+ Nuevo movimiento</button>
+      <a href="#perfil" data-nav="perfil" class="sidebar-link sidebar-profile">
+        <span class="avatar sidebar-avatar" id="sidebar-avatar">?</span>
+        <span class="sidebar-profile-text">
+          <span class="sidebar-profile-name" id="sidebar-user-name">Usuario</span>
+          <span class="sidebar-profile-hint">Tu perfil</span>
+        </span>
+      </a>
+    </div>
+  </aside>
+
+  <div class="app-body">
   <header class="app-header">
     <a href="#dashboard" class="brand" id="brand-link">
       <span class="brand-mark" aria-hidden="true">💚</span>
@@ -133,45 +183,68 @@
 
     <!-- DASHBOARD -->
     <section id="view-dashboard" class="view" data-view="dashboard">
-      <h1 class="page-title">Tu resumen</h1>
-      <p class="page-subtitle" id="dashboard-month-label">Mes actual — claridad sin presión</p>
+      <header class="page-header animate-in">
+        <div class="page-header-text">
+          <p class="greeting" id="dashboard-greeting">Hola</p>
+          <h1 class="page-title">Tu resumen</h1>
+          <p class="page-subtitle" id="dashboard-month-label">Mes actual — claridad sin presión</p>
+        </div>
+        <button type="button" class="btn btn-sm page-header-cta" id="dashboard-new-tx-btn">+ Movimiento</button>
+      </header>
 
-      <div class="summary-grid">
-        <article class="summary-card">
-          <div class="icon" aria-hidden="true">📥</div>
+      <div class="bento-grid">
+        <article class="bento-hero animate-in" style="--delay: 0.05s">
+          <div class="bento-hero-glow" aria-hidden="true"></div>
+          <div class="bento-hero-top">
+            <span class="pill-tag">Balance neto</span>
+            <span class="icon-badge" aria-hidden="true">💰</span>
+          </div>
+          <p class="hero-value" id="sum-net">$0</p>
+          <p class="card-delta hidden" id="sum-net-delta"></p>
+          <p class="card-context hero-context" id="sum-net-ctx">Lo que te queda este mes</p>
+        </article>
+
+        <article class="bento-health card health-card animate-in" style="--delay: 0.1s">
+          <div class="health-header">
+            <span class="health-label" id="health-label">Salud financiera</span>
+            <span class="health-pct" id="health-pct">0%</span>
+          </div>
+          <div class="progress-track health-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="health-bar">
+            <div class="progress-fill" id="health-fill"></div>
+          </div>
+          <p class="card-context" id="health-context">
+            Basado en la regla 50/30/20: aspirar a ahorrar al menos el 20% de tus ingresos.
+          </p>
+        </article>
+
+        <article class="bento-kpi summary-card animate-in" style="--delay: 0.12s">
+          <div class="kpi-icon income" aria-hidden="true">📥</div>
           <p class="card-title">Ingresos</p>
           <p class="card-value" id="sum-income">$0</p>
           <p class="card-delta hidden" id="sum-income-delta"></p>
           <p class="card-context">Lo que entró este mes</p>
         </article>
-        <article class="summary-card">
-          <div class="icon" aria-hidden="true">📤</div>
+        <article class="bento-kpi summary-card animate-in" style="--delay: 0.16s">
+          <div class="kpi-icon expense" aria-hidden="true">📤</div>
           <p class="card-title">Gastos totales</p>
           <p class="card-value" id="sum-expenses">$0</p>
           <p class="card-delta hidden" id="sum-expenses-delta"></p>
           <p class="card-context" id="sum-expenses-ctx">Personales + tu parte del hogar</p>
         </article>
-        <article class="summary-card">
-          <div class="icon" aria-hidden="true">🏠</div>
+        <article class="bento-kpi summary-card animate-in" style="--delay: 0.2s">
+          <div class="kpi-icon shared" aria-hidden="true">🏠</div>
           <p class="card-title">Gastos compartidos</p>
           <p class="card-value" id="sum-shared">$0</p>
           <p class="card-context">Total del hogar (bruto)</p>
         </article>
-        <article class="summary-card">
-          <div class="icon" aria-hidden="true">🤝</div>
+        <article class="bento-kpi summary-card animate-in" style="--delay: 0.24s">
+          <div class="kpi-icon couple" aria-hidden="true">🤝</div>
           <p class="card-title">Balance de pareja</p>
-          <p class="card-value" id="sum-couple" style="font-size:1.1rem;">Al día</p>
+          <p class="card-value card-value-sm" id="sum-couple">Al día</p>
           <p class="card-context" id="sum-couple-ctx">Cuentas</p>
         </article>
-        <article class="summary-card">
-          <div class="icon" aria-hidden="true">💰</div>
-          <p class="card-title">Balance neto</p>
-          <p class="card-value" id="sum-net">$0</p>
-          <p class="card-delta hidden" id="sum-net-delta"></p>
-          <p class="card-context" id="sum-net-ctx">Lo que te queda este mes</p>
-        </article>
-        <article class="summary-card">
-          <div class="icon" aria-hidden="true">🏦</div>
+        <article class="bento-kpi summary-card bento-savings animate-in" style="--delay: 0.28s">
+          <div class="kpi-icon savings" aria-hidden="true">🏦</div>
           <p class="card-title">Tasa de ahorro</p>
           <p class="card-value" id="sum-savings-rate">0%</p>
           <p class="card-delta hidden" id="sum-savings-delta"></p>
@@ -179,20 +252,8 @@
         </article>
       </div>
 
-      <div class="card health-card">
-        <div class="health-header">
-          <span class="health-label" id="health-label">Salud financiera</span>
-          <span class="health-pct" id="health-pct">0%</span>
-        </div>
-        <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="health-bar">
-          <div class="progress-fill" id="health-fill"></div>
-        </div>
-        <p class="card-context" id="health-context" style="margin-top:0.65rem;">
-          Basado en la regla 50/30/20: aspirar a ahorrar al menos el 20% de tus ingresos.
-        </p>
-      </div>
-
-      <div class="card" id="trend-card">
+      <div class="bento-wide animate-in" style="--delay: 0.32s">
+      <div class="card bento-panel" id="trend-card">
         <div class="toolbar" style="margin-bottom:0.5rem;">
           <h2 class="section-title" style="margin:0;">Últimos 6 meses</h2>
           <a href="#informes" class="btn btn-sm">Ver informe</a>
@@ -201,7 +262,7 @@
           <p>Registra movimientos en al menos 2 meses para ver tendencias.</p>
         </div>
         <div class="table-wrap hidden" id="trend-wrap">
-          <table class="data-table trend-table" id="trend-table">
+          <table class="data-table trend-table data-table--responsive" id="trend-table">
             <thead>
               <tr>
                 <th scope="col">Mes</th>
@@ -215,8 +276,10 @@
           </table>
         </div>
       </div>
+      </div>
 
-      <div class="card" id="goals-dashboard-card">
+      <div class="bento-split animate-in" style="--delay: 0.36s">
+      <div class="card bento-panel" id="goals-dashboard-card">
         <div class="toolbar" style="margin-bottom:0.5rem;">
           <h2 class="section-title" style="margin:0;">Metas de ahorro</h2>
           <a href="#metas" class="btn btn-sm">Ver todas</a>
@@ -227,7 +290,7 @@
         <ul class="goals-list" id="goals-dashboard-list"></ul>
       </div>
 
-      <div class="card budget-card" id="budget-503020">
+      <div class="card bento-panel budget-card" id="budget-503020">
         <h2 class="section-title">Tu distribución vs la regla 50/30/20</h2>
         <p class="card-context section-lead">Necesidades ≤50%, deseos ≤30%, ahorro ≥20% de tus ingresos.</p>
         <div class="empty-state-inline hidden" id="budget-503020-empty">
@@ -235,8 +298,10 @@
         </div>
         <div id="budget-503020-rows"></div>
       </div>
+      </div>
 
-      <div class="card category-card">
+      <div class="bento-split animate-in" style="--delay: 0.4s">
+      <div class="card bento-panel category-card">
         <h2 class="section-title">¿En qué se va el dinero?</h2>
         <p class="card-context section-lead">Top categorías de gasto este mes (tu parte vs límite del hogar).</p>
         <div class="empty-state-inline hidden" id="category-breakdown-empty">
@@ -248,14 +313,14 @@
         </p>
       </div>
 
-      <div class="card top-expenses-card">
+      <div class="card bento-panel top-expenses-card">
         <h2 class="section-title">Mayores gastos del mes</h2>
         <p class="card-context section-lead">Movimientos individuales más grandes (tu parte).</p>
         <div class="empty-state-inline hidden" id="top-expenses-empty">
           <p>Aún no hay gastos registrados este mes.</p>
         </div>
         <div class="table-wrap hidden" id="top-expenses-wrap">
-          <table class="data-table" id="top-expenses-table">
+          <table class="data-table data-table--responsive" id="top-expenses-table">
             <thead>
               <tr>
                 <th scope="col">Fecha</th>
@@ -269,8 +334,9 @@
           </table>
         </div>
       </div>
+      </div>
 
-      <div class="tip-card" id="tip-card">
+      <div class="tip-card animate-in" id="tip-card" style="--delay: 0.44s">
         <span class="tip-icon" aria-hidden="true">💡</span>
         <div>
           <span class="tip-label">Tip del asesor</span>
@@ -278,11 +344,11 @@
         </div>
       </div>
 
-      <div class="toolbar">
-        <h2 style="margin:0;font-size:1.1rem;">Últimos movimientos</h2>
-        <a href="#transacciones" class="btn btn-sm">Ver todos</a>
+      <div class="toolbar animate-in" style="--delay: 0.48s">
+        <h2 class="section-heading">Últimos movimientos</h2>
+        <a href="#transacciones" class="btn btn-sm btn-ghost-accent">Ver todos</a>
       </div>
-      <div class="card" style="padding:0;">
+      <div class="card bento-panel tx-panel animate-in" style="--delay: 0.52s">
         <ul class="tx-list" id="dashboard-tx-list"></ul>
         <div class="empty-state hidden" id="dashboard-empty">
           <div class="emoji">🌱</div>
@@ -300,7 +366,7 @@
           <p>Registra movimientos en al menos 2 meses para ver tendencias.</p>
         </div>
         <div class="table-wrap hidden" id="informes-trend-wrap">
-          <table class="data-table trend-table" id="informes-trend-table">
+          <table class="data-table trend-table data-table--responsive" id="informes-trend-table">
             <thead>
               <tr>
                 <th scope="col">Mes</th>
@@ -350,7 +416,7 @@
 
       <div class="card hidden" id="budgets-table-wrap">
         <div class="table-wrap">
-          <table class="data-table budgets-table" id="budgets-table">
+          <table class="data-table budgets-table data-table--responsive" id="budgets-table">
             <thead>
               <tr>
                 <th scope="col">Categoría</th>
@@ -501,23 +567,28 @@
       </div>
     </section>
   </main>
+  </div><!-- .app-body -->
+  </div><!-- .app-shell -->
 
   <nav class="bottom-nav hidden" id="bottom-nav" aria-label="Navegación principal">
-    <a href="#dashboard" data-nav="dashboard">
+    <a href="#dashboard" data-nav="dashboard" class="bottom-nav-link">
       <span class="nav-icon" aria-hidden="true">📊</span>
-      Resumen
+      <span class="nav-label">Resumen</span>
     </a>
-    <a href="#transacciones" data-nav="transacciones">
+    <a href="#transacciones" data-nav="transacciones" class="bottom-nav-link">
       <span class="nav-icon" aria-hidden="true">💸</span>
-      Movimientos
+      <span class="nav-label">Movimientos</span>
     </a>
-    <a href="#liquidacion" data-nav="liquidacion">
+    <button type="button" class="bottom-nav-fab" id="fab-tx-btn" aria-label="Nuevo movimiento">
+      <span aria-hidden="true">+</span>
+    </button>
+    <a href="#liquidacion" data-nav="liquidacion" class="bottom-nav-link">
       <span class="nav-icon" aria-hidden="true">⚖️</span>
-      Pareja
+      <span class="nav-label">Pareja</span>
     </a>
-    <a href="#presupuestos" data-nav="presupuestos">
+    <a href="#presupuestos" data-nav="presupuestos" class="bottom-nav-link">
       <span class="nav-icon" aria-hidden="true">🎯</span>
-      Presupuestos
+      <span class="nav-label">Presupuestos</span>
     </a>
   </nav>
 
@@ -651,15 +722,14 @@
   <div class="toast-host" id="toast-host" aria-live="polite"></div>
 
   <script>
-    /* Fallback si app.js no arranca (CDN bloqueado, error de módulo, etc.) */
+    /* Solo si el módulo nunca arranca (CDN/módulo roto). Si boot() corre, marca __finanzasBootStarted. */
     setTimeout(function () {
+      if (window.__finanzasBootStarted) return;
       var loading = document.getElementById('loading');
       var fallback = document.getElementById('boot-fallback');
-      if (loading && !loading.classList.contains('hidden') && fallback) {
-        loading.classList.add('hidden');
-        fallback.classList.remove('hidden');
-      }
-    }, 8000);
+      if (loading) loading.classList.add('hidden');
+      if (fallback) fallback.classList.remove('hidden');
+    }, 12000);
   </script>
 
   <script type="module" src="js/app.js"></script>
