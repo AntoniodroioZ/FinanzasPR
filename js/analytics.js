@@ -112,9 +112,9 @@ export function computeCategoryBreakdown(transactions, userId, limit = 8) {
     const cat = tx.categories;
     const name = cat?.name || 'Sin categoría';
     const icon = cat?.icon || '📌';
-    const id = name;
+    const id = tx.category_id || cat?.id || name;
 
-    const prev = totals.get(id) || { name, icon, amount: 0 };
+    const prev = totals.get(id) || { id, name, icon, amount: 0 };
     prev.amount += userAmount;
     totals.set(id, prev);
   }
@@ -124,6 +124,7 @@ export function computeCategoryBreakdown(transactions, userId, limit = 8) {
 
   return items.slice(0, limit).map((item) => ({
     ...item,
+    categoryId: item.id,
     pctOfExpenses: totalExpenses > 0 ? item.amount / totalExpenses : 0,
   }));
 }

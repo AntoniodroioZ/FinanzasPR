@@ -180,6 +180,23 @@ img {
   font-size: 0.85rem;
   color: var(--text-secondary);
   max-width: 12rem;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.user-chip:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--border);
+  text-decoration: none;
+}
+
+.user-chip.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 .user-chip span {
@@ -703,6 +720,194 @@ img {
   color: var(--text-muted);
 }
 
+.category-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-top: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.category-foot .category-pct {
+  margin-top: 0;
+}
+
+.budget-track {
+  height: 0.45rem;
+}
+
+.budget-usage-fill.ok {
+  background: linear-gradient(90deg, var(--accent), #74c69d);
+}
+
+.budget-usage-fill.warn {
+  background: linear-gradient(90deg, #f4a261, #e9c46a);
+}
+
+.budget-usage-fill.danger {
+  background: linear-gradient(90deg, #e76f51, #d62828);
+}
+
+.bucket-remaining {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ---------- v1.2 presupuestos ---------- */
+.budgets-table .budget-input {
+  width: 6.5rem;
+  max-width: 100%;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  text-align: right;
+}
+
+.budgets-table .budget-cat {
+  white-space: nowrap;
+}
+
+.budgets-actions {
+  padding: var(--space-md);
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.budgets-table {
+  min-width: 32rem;
+}
+
+/* ---------- v1.3 trends ---------- */
+.trend-table .trend-row-selected td {
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+
+.trend-row-empty td {
+  color: var(--text-muted);
+}
+
+.trend-mini-bar {
+  height: 0.45rem;
+  min-width: 4px;
+  max-width: 100%;
+  background: linear-gradient(90deg, var(--accent), #74c69d);
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- v1.3 goals ---------- */
+.goals-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.goal-row + .goal-row {
+  margin-top: var(--space-md);
+}
+
+.goal-row-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-sm);
+  margin-bottom: 0.35rem;
+}
+
+.goal-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.goal-amount {
+  font-weight: 700;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.goal-track {
+  height: 0.45rem;
+}
+
+.goal-fill {
+  background: linear-gradient(90deg, #4cc9f0, var(--accent));
+}
+
+.goal-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.25rem;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.goal-pct {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.goal-actions {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.goals-list-full .goal-row {
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+/* ---------- v1.3 settlement ---------- */
+.settlement-actions {
+  margin-top: var(--space-md);
+}
+
+.settlement-disclaimer {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.contribution-row {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.settlement-history summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.settlement-history summary::-webkit-details-marker {
+  display: none;
+}
+
+.settlement-history-list {
+  list-style: none;
+  margin: var(--space-md) 0 0;
+  padding: 0;
+}
+
+.settlement-history-item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+
+.split-presets {
+  flex-wrap: wrap;
+}
+
 /* ---------- Health bar ---------- */
 .health-card {
   margin-bottom: var(--space-md);
@@ -967,6 +1172,114 @@ img {
   color: var(--accent);
   font-weight: 700;
   margin: var(--space-sm) 0;
+}
+
+/* ---------- Profile ---------- */
+.profile-hero-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.avatar-lg {
+  width: 3.25rem;
+  height: 3.25rem;
+  font-size: 1.25rem;
+}
+
+.profile-display-name {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.profile-hero-text {
+  min-width: 0;
+}
+
+.copy-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-top: var(--space-sm);
+}
+
+.copy-field-compact {
+  margin-top: 0;
+  justify-content: flex-end;
+}
+
+.profile-invite-code {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0.5rem 0.65rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+}
+
+.profile-id-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  word-break: break-all;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--radius-sm);
+  max-width: 14rem;
+}
+
+.profile-group-label {
+  margin-top: 0.75rem;
+  margin-bottom: 0;
+}
+
+.profile-members {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.profile-member-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-member-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.profile-member-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.profile-detail-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.profile-account-card .profile-logout-btn {
+  margin-top: var(--space-md);
+}
+
+.profile-account-card .card-context {
+  margin-bottom: 0;
 }
 
 /* ---------- Bottom nav ---------- */

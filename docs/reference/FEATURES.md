@@ -8,8 +8,10 @@ Memoria de producto para desarrollo. Prioridades relativas al estado actual del 
 |--------|-------------|
 | `exists` | Visible o usable en UI hoy |
 | `computed` | Se calcula en `js/balances.js` / tips, pero no se muestra (o solo de forma parcial) |
-| `planned-mvp+` | Alcance inmediato (ver `MVP-PLUS-PLAN.md`) |
-| `backlog` | Idea validada, fuera del MVP+ |
+| `planned-mvp+` | Alcance MVP+ (ver `MVP-PLUS-PLAN.md`) |
+| `planned-v1.2` | Alcance v1.2 (ver `V1.2-PLAN.md`) |
+| `planned-v1.3` | Alcance v1.3 (ver `V1.3-PLAN.md`) |
+| `backlog` | Idea validada, fuera de la fase activa |
 | `future` | Visión a medio/largo plazo |
 
 ---
@@ -45,7 +47,7 @@ Memoria de producto para desarrollo. Prioridades relativas al estado actual del 
 | Totales necesidades / deseos / ahorro | `exists` | Bloque `#budget-503020` |
 | **Gráfica o barras 50/30/20** (real vs meta) | `exists` | Barras CSS + marcador meta |
 | Semáforo por bucket | `exists` | Chips ok / warn / danger |
-| Gasto restante por bucket (“te quedan $X en deseos”) | `backlog` | Depende de presupuestos o de la meta % |
+| Gasto restante por bucket (“te quedan $X en deseos”) | `exists` | Subtítulo en `#budget-503020` |
 
 ---
 
@@ -68,7 +70,7 @@ Memoria de producto para desarrollo. Prioridades relativas al estado actual del 
 | Feature | Estado | Notas |
 |---------|--------|-------|
 | Cashflow diario (línea ingresos vs gastos) | `backlog` | |
-| Tendencia 3–6 meses | `backlog` | Necesita query multi-mes |
+| Tendencia 3–6 meses | `exists` | Tabla 6 meses en dashboard + `#informes` |
 | Heatmap semanal de gasto | `future` | |
 | Widget “mes en 1 mirada” | `backlog` | Composición de KPIs MVP+ |
 
@@ -95,9 +97,9 @@ Memoria de producto para desarrollo. Prioridades relativas al estado actual del 
 | Split 50/50 (`split_ratio` default 0.5) | `exists` | |
 | Mensaje de quién transfiere a quién | `exists` | |
 | Resumen crédito neto por persona | `exists` | |
-| Aportación % de cada quien a compartidos | `backlog` | |
-| Historial de liquidaciones (marcar pagado) | `backlog` | Nueva tabla o flag |
-| Split editable (60/40, proporcional a ingresos) | `backlog` | |
+| Aportación % de cada quien a compartidos | `exists` | Bloque liquidación |
+| Historial de liquidaciones (marcar pagado) | `exists` | Tabla `settlements` |
+| Split editable (60/40, proporcional a ingresos) | `exists` | Columnas en `groups` + modal TX |
 | Presupuesto del hogar vs personal | `future` | |
 
 ---
@@ -106,9 +108,9 @@ Memoria de producto para desarrollo. Prioridades relativas al estado actual del 
 
 | Feature | Estado | Notas |
 |---------|--------|-------|
-| Presupuesto mensual por categoría + barra | `backlog` | Schema nuevo |
-| Alertas al 80/100% del presupuesto | `backlog` | |
-| Metas de ahorro (emergencia, viaje, etc.) | `backlog` | |
+| Presupuesto mensual por categoría + barra | `exists` | Tabla `category_budgets`, vista `#presupuestos` |
+| Alertas al 80/100% del presupuesto | `exists` | Chips + tip prioritario |
+| Metas de ahorro (emergencia, viaje, etc.) | `exists` | Tabla `savings_goals`, vista `#metas` |
 | Score de salud compuesto (más que ahorro) | `backlog` | |
 | 3 insights del asesor (no solo 1 tip) | `backlog` | Extender `tips.js` |
 | Simulador “¿qué pasaría si…?” | `future` | |
@@ -140,10 +142,11 @@ Memoria de producto para desarrollo. Prioridades relativas al estado actual del 
 
 | Fase | Contenido | Doc |
 |------|-----------|-----|
-| **MVP+** | Balance neto, desglose visual 50/30/20, gasto por categoría, KPIs derivados ya calculados | `MVP-PLUS-PLAN.md` |
-| **v1.1** | Selector de mes, vs mes anterior, top gastos | `V1.1-PLAN.md` |
-| **v1.2** | Presupuestos por categoría + alertas | backlog |
-| **v1.3** | Tendencias 6 meses, metas de ahorro, splits flexibles, historial liquidación | backlog / future |
+| **MVP+** ✅ | Balance neto, 50/30/20 visual, gasto por categoría | `MVP-PLUS-PLAN.md` |
+| **v1.1** ✅ | Selector de mes, vs mes anterior, top gastos | `V1.1-PLAN.md` |
+| **v1.2** ✅ | Presupuestos por categoría, alertas, restante por bucket | `V1.2-PLAN.md` |
+| **v1.3** ✅ | Tendencia 6 meses, metas ahorro, splits flexibles, historial liquidación | `V1.3-PLAN.md` |
+| **post-v1.3** | Export CSV, filtros movimientos, insights múltiples, categorías custom | backlog en secciones 3–7 |
 
 ---
 
@@ -157,4 +160,4 @@ Memoria de producto para desarrollo. Prioridades relativas al estado actual del 
 
 ---
 
-*Última actualización: planificación MVP+ — agosto 2026*
+*Última actualización: planes v1.2 y v1.3 — agosto 2026*

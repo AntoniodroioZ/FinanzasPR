@@ -44,3 +44,18 @@ export async function fetchGroupMembers(groupId) {
   if (error) throw error;
   return data || [];
 }
+
+export async function updateGroupSettings(groupId, { default_split_ratio, split_mode }) {
+  const payload = {};
+  if (default_split_ratio !== undefined) payload.default_split_ratio = default_split_ratio;
+  if (split_mode !== undefined) payload.split_mode = split_mode;
+
+  const { data, error } = await supabase
+    .from('groups')
+    .update(payload)
+    .eq('id', groupId)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}

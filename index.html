@@ -39,10 +39,10 @@
       <button type="button" class="btn-icon" id="theme-toggle" aria-label="Cambiar tema claro/oscuro" title="Tema">
         <span id="theme-toggle-icon">🌙</span>
       </button>
-      <div id="user-chip" class="user-chip hidden">
+      <a href="#perfil" id="user-chip" class="user-chip hidden" aria-label="Ir a tu perfil" title="Tu perfil">
         <span class="avatar" id="user-avatar">?</span>
         <span id="user-name">Usuario</span>
-      </div>
+      </a>
       <button type="button" class="btn btn-ghost btn-sm hidden" id="logout-btn">Salir</button>
     </div>
   </header>
@@ -161,7 +161,7 @@
           <div class="icon" aria-hidden="true">🤝</div>
           <p class="card-title">Balance de pareja</p>
           <p class="card-value" id="sum-couple" style="font-size:1.1rem;">Al día</p>
-          <p class="card-context" id="sum-couple-ctx">Cuentas claras</p>
+          <p class="card-context" id="sum-couple-ctx">Cuentas</p>
         </article>
         <article class="summary-card">
           <div class="icon" aria-hidden="true">💰</div>
@@ -192,6 +192,41 @@
         </p>
       </div>
 
+      <div class="card" id="trend-card">
+        <div class="toolbar" style="margin-bottom:0.5rem;">
+          <h2 class="section-title" style="margin:0;">Últimos 6 meses</h2>
+          <a href="#informes" class="btn btn-sm">Ver informe</a>
+        </div>
+        <div class="empty-state-inline hidden" id="trend-empty">
+          <p>Registra movimientos en al menos 2 meses para ver tendencias.</p>
+        </div>
+        <div class="table-wrap hidden" id="trend-wrap">
+          <table class="data-table trend-table" id="trend-table">
+            <thead>
+              <tr>
+                <th scope="col">Mes</th>
+                <th scope="col" class="num">Ingresos</th>
+                <th scope="col" class="num">Gastos</th>
+                <th scope="col" class="num">Ahorro</th>
+                <th scope="col" class="num">Neto</th>
+              </tr>
+            </thead>
+            <tbody id="trend-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" id="goals-dashboard-card">
+        <div class="toolbar" style="margin-bottom:0.5rem;">
+          <h2 class="section-title" style="margin:0;">Metas de ahorro</h2>
+          <a href="#metas" class="btn btn-sm">Ver todas</a>
+        </div>
+        <div class="empty-state-inline" id="goals-dashboard-empty">
+          <p>Sin metas activas. <a href="#metas">Crea una meta</a> para darle dirección a tu ahorro.</p>
+        </div>
+        <ul class="goals-list" id="goals-dashboard-list"></ul>
+      </div>
+
       <div class="card budget-card" id="budget-503020">
         <h2 class="section-title">Tu distribución vs la regla 50/30/20</h2>
         <p class="card-context section-lead">Necesidades ≤50%, deseos ≤30%, ahorro ≥20% de tus ingresos.</p>
@@ -203,11 +238,14 @@
 
       <div class="card category-card">
         <h2 class="section-title">¿En qué se va el dinero?</h2>
-        <p class="card-context section-lead">Top categorías de gasto este mes (tu parte).</p>
+        <p class="card-context section-lead">Top categorías de gasto este mes (tu parte vs límite del hogar).</p>
         <div class="empty-state-inline hidden" id="category-breakdown-empty">
           <p>Aún no hay gastos registrados este mes.</p>
         </div>
         <ul class="category-breakdown" id="category-breakdown"></ul>
+        <p class="card-context" style="margin-top:0.75rem;">
+          <a href="#presupuestos">Configurar presupuestos →</a>
+        </p>
       </div>
 
       <div class="card top-expenses-card">
@@ -253,6 +291,84 @@
       </div>
     </section>
 
+    <!-- INFORMES -->
+    <section id="view-informes" class="view" data-view="informes">
+      <h1 class="page-title">Informes</h1>
+      <p class="page-subtitle">Evolución de tus finanzas en los últimos 6 meses (ancla: mes seleccionado).</p>
+      <div class="card">
+        <div class="empty-state-inline hidden" id="informes-trend-empty">
+          <p>Registra movimientos en al menos 2 meses para ver tendencias.</p>
+        </div>
+        <div class="table-wrap hidden" id="informes-trend-wrap">
+          <table class="data-table trend-table" id="informes-trend-table">
+            <thead>
+              <tr>
+                <th scope="col">Mes</th>
+                <th scope="col" class="num">Ingresos</th>
+                <th scope="col" class="num">Gastos</th>
+                <th scope="col" class="num">Gastos (barra)</th>
+                <th scope="col" class="num">Ahorro</th>
+                <th scope="col" class="num">Neto</th>
+              </tr>
+            </thead>
+            <tbody id="informes-trend-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- METAS -->
+    <section id="view-metas" class="view" data-view="metas">
+      <div class="toolbar">
+        <div>
+          <h1 class="page-title" style="margin-bottom:0;">Metas de ahorro</h1>
+          <p class="page-subtitle" style="margin-bottom:0;">Vincula a una categoría o actualiza el progreso manualmente.</p>
+        </div>
+        <button type="button" class="btn" id="open-goal-modal-btn">+ Nueva meta</button>
+      </div>
+      <div class="empty-state hidden" id="metas-empty">
+        <div class="emoji">🎯</div>
+        <p>Aún no tienes metas. Empieza con un fondo de emergencia o un viaje.</p>
+      </div>
+      <ul class="goals-list goals-list-full" id="metas-list"></ul>
+    </section>
+
+    <!-- PRESUPUESTOS -->
+    <section id="view-presupuestos" class="view" data-view="presupuestos">
+      <div class="toolbar">
+        <div>
+          <h1 class="page-title" id="presupuestos-title" style="margin-bottom:0;">Presupuestos</h1>
+          <p class="page-subtitle" style="margin-bottom:0;">Tu parte del gasto vs el límite del hogar.</p>
+        </div>
+        <button type="button" class="btn btn-sm" id="budgets-copy-prev">Copiar del mes anterior</button>
+      </div>
+
+      <div class="empty-state hidden" id="budgets-empty">
+        <div class="emoji">🎯</div>
+        <p>Define límites opcionales — sin presión, solo claridad.</p>
+      </div>
+
+      <div class="card hidden" id="budgets-table-wrap">
+        <div class="table-wrap">
+          <table class="data-table budgets-table" id="budgets-table">
+            <thead>
+              <tr>
+                <th scope="col">Categoría</th>
+                <th scope="col" class="num">Presupuesto</th>
+                <th scope="col" class="num">Gastado</th>
+                <th scope="col">Estado</th>
+                <th scope="col" class="num">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="budgets-table-body"></tbody>
+          </table>
+        </div>
+        <div class="budgets-actions">
+          <button type="button" class="btn" id="budgets-save-all">Guardar todos</button>
+        </div>
+      </div>
+    </section>
+
     <!-- TRANSACCIONES -->
     <section id="view-transacciones" class="view" data-view="transacciones">
       <div class="toolbar">
@@ -273,21 +389,36 @@
 
     <!-- LIQUIDACION -->
     <section id="view-liquidacion" class="view" data-view="liquidacion">
-      <h1 class="page-title">Cuentas claras</h1>
-      <p class="page-subtitle">
-        <!-- Consejo: liquidar pronto evita acumular resentimiento por dinero. -->
-        Calculamos quién adelantó más en gastos compartidos (50/50 por defecto).
-      </p>
+      <div class="toolbar">
+        <div>
+          <h1 class="page-title" style="margin-bottom:0;">Balance en pareja</h1>
+          <p class="page-subtitle" style="margin-bottom:0;">
+            Quién adelantó más en gastos compartidos — según el split del hogar.
+          </p>
+        </div>
+        <button type="button" class="btn btn-sm" id="open-household-settings">Configuración</button>
+      </div>
 
       <div class="card">
         <p class="card-title">Estado de liquidación</p>
         <p class="settlement-message" id="settlement-message">Cargando…</p>
+        <div class="settlement-actions hidden" id="settlement-actions">
+          <button type="button" class="btn btn-sm" id="mark-settlement-paid">Marcar como pagado</button>
+          <p class="card-context settlement-disclaimer">Registro de acuerdo entre ustedes — no es un pago bancario.</p>
+        </div>
       </div>
 
       <div class="card">
         <p class="card-title">Resumen por persona</p>
         <div id="settlement-partners"></div>
+        <div id="settlement-contributions"></div>
       </div>
+
+      <details class="card settlement-history" id="settlement-history">
+        <summary class="card-title">Historial de liquidaciones</summary>
+        <ul class="settlement-history-list" id="settlement-history-list"></ul>
+        <p class="card-context hidden" id="settlement-history-empty">Sin liquidaciones registradas todavía.</p>
+      </details>
 
       <div class="toolbar" style="margin-top:1rem;">
         <h2 style="margin:0;font-size:1.1rem;">Gastos compartidos del mes</h2>
@@ -298,6 +429,75 @@
           <div class="emoji">🤝</div>
           <p>No hay gastos compartidos este mes. Cuando los haya, verás el balance aquí.</p>
         </div>
+      </div>
+    </section>
+
+    <!-- PERFIL -->
+    <section id="view-perfil" class="view" data-view="perfil">
+      <h1 class="page-title">Tu perfil</h1>
+      <p class="page-subtitle">Tu cuenta y el código para enlazar con tu pareja.</p>
+
+      <div class="card profile-hero">
+        <div class="profile-hero-row">
+          <span class="avatar avatar-lg" id="profile-avatar-lg" aria-hidden="true">?</span>
+          <div class="profile-hero-text">
+            <p class="profile-display-name" id="profile-name-display">Usuario</p>
+            <p class="card-context" id="profile-email-display"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Nombre visible</h2>
+        <form id="profile-name-form">
+          <div class="form-group">
+            <label for="profile-name-input">Cómo te llamamos</label>
+            <input id="profile-name-input" type="text" maxlength="80" autocomplete="name" placeholder="Tu nombre" />
+          </div>
+          <button type="submit" class="btn btn-sm">Guardar</button>
+          <p id="profile-name-error" class="form-error hidden" role="alert"></p>
+        </form>
+      </div>
+
+      <div id="profile-invite-section" class="hidden">
+        <div class="card">
+          <h2 class="section-title">Código de invitación</h2>
+          <p class="card-context" id="profile-invite-hint">
+            Comparte este UUID con tu pareja para enlazar cuentas en el mismo espacio.
+          </p>
+          <div class="copy-field">
+            <code class="invite-code profile-invite-code" id="profile-invite-code"></code>
+            <button type="button" class="btn btn-secondary btn-sm" id="copy-profile-invite-btn">Copiar código</button>
+          </div>
+          <p class="card-context profile-group-label">
+            Espacio: <strong id="profile-group-name"></strong>
+          </p>
+        </div>
+
+        <div class="card">
+          <h2 class="section-title">Miembros del espacio</h2>
+          <div id="profile-members" class="profile-members"></div>
+        </div>
+      </div>
+
+      <div id="profile-no-group-section" class="card hidden">
+        <p class="card-context" style="margin:0;">
+          Aún no tienes un espacio compartido.
+          <a href="#onboarding">Crea uno o únete</a> con un código de invitación.
+        </p>
+      </div>
+
+      <div class="card profile-account-card">
+        <h2 class="section-title">Cuenta</h2>
+        <div class="profile-detail-row">
+          <span class="muted">ID de usuario</span>
+          <div class="copy-field copy-field-compact">
+            <code class="profile-id-code" id="profile-user-id"></code>
+            <button type="button" class="btn btn-ghost btn-sm" id="copy-profile-user-id-btn">Copiar</button>
+          </div>
+        </div>
+        <p class="card-context">El código de invitación es el que usa tu pareja para unirse; tu ID es solo para referencia.</p>
+        <button type="button" class="btn btn-ghost btn-block profile-logout-btn" id="profile-logout-btn">Cerrar sesión</button>
       </div>
     </section>
   </main>
@@ -314,6 +514,10 @@
     <a href="#liquidacion" data-nav="liquidacion">
       <span class="nav-icon" aria-hidden="true">⚖️</span>
       Pareja
+    </a>
+    <a href="#presupuestos" data-nav="presupuestos">
+      <span class="nav-icon" aria-hidden="true">🎯</span>
+      Presupuestos
     </a>
   </nav>
 
@@ -363,8 +567,83 @@
           <label for="tx-payer">Quién pagó</label>
           <select id="tx-payer"></select>
         </div>
+        <p class="card-context hidden" id="tx-split-hint"></p>
         <button type="submit" class="btn btn-block">Guardar</button>
         <p id="tx-form-error" class="form-error hidden" role="alert"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal configuración del hogar -->
+  <div id="household-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="household-modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="household-modal-title">Configuración del hogar</h2>
+        <button type="button" class="btn-icon" id="close-household-modal" aria-label="Cerrar">✕</button>
+      </div>
+      <form id="household-form">
+        <div class="form-group">
+          <label>Modo de split</label>
+          <div class="segmented">
+            <label><input type="radio" name="split-mode" value="fixed" checked /> Fijo</label>
+            <label><input type="radio" name="split-mode" value="income_proportional" /> Proporcional a ingresos</label>
+          </div>
+        </div>
+        <div class="form-group" id="split-ratio-group">
+          <label>Split fijo (tu parte)</label>
+          <div class="segmented split-presets">
+            <label><input type="radio" name="split-preset" value="0.5" checked /> 50/50</label>
+            <label><input type="radio" name="split-preset" value="0.6" /> 60/40</label>
+            <label><input type="radio" name="split-preset" value="0.7" /> 70/30</label>
+          </div>
+          <p class="card-context">Porcentaje de gastos compartidos que te corresponde a ti.</p>
+        </div>
+        <button type="submit" class="btn btn-block">Guardar</button>
+        <p id="household-form-error" class="form-error hidden" role="alert"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal nueva meta -->
+  <div id="goal-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="goal-modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="goal-modal-title">Nueva meta</h2>
+        <button type="button" class="btn-icon" id="close-goal-modal" aria-label="Cerrar">✕</button>
+      </div>
+      <form id="goal-form">
+        <div class="form-group">
+          <label for="goal-name">Nombre</label>
+          <input id="goal-name" type="text" required maxlength="80" placeholder="Ej. Fondo de emergencia" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="goal-target">Objetivo</label>
+            <input id="goal-target" type="number" min="0.01" step="0.01" required placeholder="10000" />
+          </div>
+          <div class="form-group">
+            <label for="goal-icon">Icono</label>
+            <input id="goal-icon" type="text" maxlength="4" value="🎯" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="goal-category">Categoría (opcional)</label>
+          <select id="goal-category">
+            <option value="">Manual — actualiza tú el progreso</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="goal-current">Progreso manual</label>
+            <input id="goal-current" type="number" min="0" step="0.01" value="0" />
+          </div>
+          <div class="form-group">
+            <label for="goal-deadline">Fecha límite (opcional)</label>
+            <input id="goal-deadline" type="date" />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-block">Crear meta</button>
+        <p id="goal-form-error" class="form-error hidden" role="alert"></p>
       </form>
     </div>
   </div>

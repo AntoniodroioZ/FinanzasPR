@@ -10,6 +10,8 @@ Antes de proponer o implementar features de dashboard, métricas, gráficas o ca
 - `docs/reference/FEATURES.md` — catálogo completo (estado: exists / computed / planned-mvp+ / backlog / future)
 - `docs/reference/MVP-PLUS-PLAN.md` — alcance e implementación del MVP+ activo
 - `docs/reference/V1.1-PLAN.md` — selector de mes, deltas y top gastos
+- `docs/reference/V1.2-PLAN.md` — presupuestos por categoría y alertas
+- `docs/reference/V1.3-PLAN.md` — tendencias, metas, splits, liquidación
 
 ## Reglas
 

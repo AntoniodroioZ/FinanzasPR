@@ -5,9 +5,10 @@
 
 /**
  * @param {object} stats — salida de computeBalances + campos opcionales
+ * @param {Array} [budgetUsage] — salida de computeBudgetUsage
  * @returns {{ text: string, icon: string }}
  */
-export function getFinancialTip(stats) {
+export function getFinancialTip(stats, budgetUsage = []) {
   const {
     ingresos = 0,
     gastosNecesidades = 0,
@@ -18,6 +19,14 @@ export function getFinancialTip(stats) {
     settlementAmount = 0,
     healthScore = 0,
   } = stats || {};
+
+  const overrun = budgetUsage.find((u) => u.status === 'danger');
+  if (overrun) {
+    return {
+      icon: '🎯',
+      text: `${overrun.name} superó tu presupuesto este mes. Un ajuste pequeño el resto del mes puede equilibrar.`,
+    };
+  }
 
   if (ingresos <= 0) {
     return {

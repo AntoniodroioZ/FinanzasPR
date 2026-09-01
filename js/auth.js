@@ -73,3 +73,14 @@ export async function fetchProfile(userId) {
   if (error) throw error;
   return data;
 }
+
+export async function updateProfile(userId, { full_name }) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ full_name })
+    .eq('id', userId)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
